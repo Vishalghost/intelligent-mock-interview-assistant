@@ -1,68 +1,125 @@
-# Professional Interview Assessment Platform
+# 🎯 AI-Powered Interview Assistant
 
-Advanced AI-powered interview preparation and evaluation system with comprehensive web interface.
+Advanced interview preparation platform with voice recognition, AI evaluation, and comprehensive feedback.
 
-## Features
+## ✨ Features
 
-- **Resume Analysis**: Extract skills, experience, and ATS scores from PDF/DOCX
-- **Extreme Questions**: Generate challenging, role-specific interview questions
-- **Multi-Dimensional Evaluation**: Advanced AI scoring across 6 key dimensions
-- **Professional Web Interface**: Clean, corporate-grade user experience
-- **Personalized Resources**: Custom learning paths and preparation roadmaps
-- **Job Matching**: Intelligent job recommendations based on performance
+- **🎤 Voice-Only Interface** - Speak your answers naturally
+- **🤖 AI-Powered Evaluation** - DeepSeek API integration for intelligent scoring
+- **📄 Resume Analysis** - Extract skills and experience from PDF/DOCX
+- **📊 Multi-Dimensional Scoring** - 6 key performance dimensions
+- **🎯 Personalized Questions** - Role-specific interview questions
+- **📈 Detailed Reports** - Comprehensive assessment with improvement suggestions
 
-## Quick Start
+## 🚀 Quick Start
 
-1. Install dependencies:
+### Option 1: Easy Setup (Recommended)
+1. **Download and run the setup file:**
+   ```bash
+   # Double-click: setup_and_run.bat
+   ```
+
+### Option 2: Manual Setup
+1. **Install dependencies:**
+   ```bash
+   pip install -r requirements_voice.txt
+   ```
+
+2. **Set your DeepSeek API key:**
+   ```bash
+   set DEEPSEEK_API_KEY=your_api_key_here
+   ```
+
+3. **Run the application:**
+   ```bash
+   python minimal_app.py
+   ```
+
+4. **Open your browser:**
+   ```
+   http://localhost:5002
+   ```
+
+## 🔧 Configuration
+
+### DeepSeek API Setup
+1. Get your API key from [DeepSeek](https://platform.deepseek.com/)
+2. Set environment variable: `DEEPSEEK_API_KEY=your_key`
+3. Or edit the setup file with your key
+
+### HTTPS for Voice (Optional)
+For full voice functionality:
 ```bash
-pip install -r requirements.txt
+python generate_cert.py
+python start_secure.py
+# Visit: https://localhost:5002
 ```
 
-2. Configure AWS credentials (optional for enhanced features):
-```bash
-aws configure
+## 📁 Project Structure
+
+```
+├── minimal_app.py              # 🎯 Main application (start here)
+├── professional_app_clean.py   # 🔧 Full-featured version
+├── mcp_server.py              # 🤖 MCP server for Amazon Q CLI
+├── templates/                 # 🎨 Web interface
+├── static/                    # 💄 CSS/JS assets
+├── enhanced_resume_parser.py  # 📄 Resume processing
+├── optimized_deepseek.py      # 🤖 AI integration
+└── setup_and_run.bat         # 🚀 One-click setup
 ```
 
-3. Start the web application:
+## 🎮 Usage
+
+1. **Upload Resume** - PDF or DOCX format
+2. **Select Role** - Choose your target position
+3. **Voice Interview** - Speak your answers (or type)
+4. **Get Results** - Detailed evaluation and feedback
+5. **Download Report** - Comprehensive assessment PDF
+
+## 🔌 MCP Server Integration
+
+For Amazon Q CLI integration:
 ```bash
-python professional_app.py
+python mcp_server.py
 ```
 
-4. Open your browser to: `http://localhost:5002`
+Available tools:
+- `analyze_resume` - Parse resume files
+- `generate_questions` - Create interview questions
+- `evaluate_answer` - Score responses
 
-## Alternative Startup
+## 🛠️ Troubleshooting
 
-Double-click `run_app.bat` on Windows for easy startup.
+**Voice not working?**
+- Use HTTPS: `python start_secure.py`
+- Allow microphone permissions in browser
 
-## Usage
+**API errors?**
+- Check your DeepSeek API key
+- Verify internet connection
 
-1. Upload your resume (PDF/DOCX format)
-2. Select target position level
-3. Complete AI-generated interview questions
-4. Review comprehensive evaluation and recommendations
-5. Download detailed assessment report
+**Import errors?**
+- Run: `pip install -r requirements_voice.txt`
 
-## Core Components
+## 📊 Evaluation Dimensions
 
-- `professional_app.py` - Flask web application server
-- `resume_parser.py` - Advanced resume analysis and parsing
-- `extreme_questions.py` - Challenging question generation engine
-- `advanced_evaluator.py` - Multi-dimensional response evaluation
-- `resources_generator.py` - Personalized learning resource creation
-- `job_matcher.py` - Intelligent job opportunity matching
+1. **Technical Mastery** - Domain expertise
+2. **Problem Solving** - Analytical thinking
+3. **Communication** - Clarity and articulation
+4. **Innovation** - Creative solutions
+5. **Leadership** - Team and project management
+6. **System Thinking** - Architecture and design
 
-## Web Interface
+## 🤝 Contributing
 
-- **Modern Design**: Professional, clean interface suitable for corporate use
-- **Progress Tracking**: Real-time progress indicators throughout assessment
-- **Responsive Layout**: Works on desktop, tablet, and mobile devices
-- **Interactive Elements**: Dynamic scoring, animations, and feedback
+1. Fork the repository
+2. Create feature branch
+3. Submit pull request
 
-## Assessment Output
+## 📄 License
 
-- Overall performance score and readiness level
-- Dimension-specific analysis (Technical, Communication, Leadership, etc.)
-- Personalized improvement recommendations
-- Curated learning resources and action plans
-- Matching job opportunities with compatibility scores
-- Downloadable comprehensive assessment report
+MIT License - See LICENSE file for details
+
+---
+
+**Ready to ace your next interview? Run `setup_and_run.bat` and get started! 🚀**
