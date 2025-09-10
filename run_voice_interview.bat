@@ -1,9 +1,0 @@
-@echo off
-echo 🎤 Starting Voice-Enabled AI Interview Assistant...
-echo.
-echo Installing voice dependencies...
-pip install -r requirements_voice.txt
-echo.
-echo 🚀 Launching application...
-python professional_app.py
-pause
