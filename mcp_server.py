@@ -1,17 +1,26 @@
 #!/usr/bin/env python3
 import asyncio
 import json
+import os
+from datetime import datetime
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp.types import Resource, Tool, TextContent
 from enhanced_resume_parser import EnhancedResumeParser
 from optimized_deepseek import OptimizedDeepSeekAI
 from extreme_questions import ExtremeQuestions
+from domain_matcher import DomainMatcher
+from live_job_fetcher import LiveJobFetcher
 
 app = Server("interview-assistant")
 resume_parser = EnhancedResumeParser()
 ai_engine = OptimizedDeepSeekAI()
 question_generator = ExtremeQuestions()
+domain_matcher = DomainMatcher()
+job_fetcher = LiveJobFetcher()
+
+# Session storage for Amazon Q CLI
+session_data = {}
 
 @app.list_resources()
 async def list_resources():
@@ -67,6 +76,27 @@ async def list_tools():
                 },
                 "required": ["question", "answer", "role"]
             }
+        ),
+        Tool(
+            name="start_interview",
+            description="Start complete interview process",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "resume_path": {"type": "string"},
+                    "role": {"type": "string", "default": "Software Engineer"}
+                },
+                "required": ["resume_path"]
+            }
+        ),
+        Tool(
+            name="get_results",
+            description="Get interview results and job matches",
+            inputSchema={
+                "type": "object",
+                "properties": {},
+                "required": []
+            }
         )
     ]
 
@@ -97,7 +127,81 @@ async def call_tool(name: str, arguments: dict):
                 arguments["answer"], 
                 arguments["role"]
             )
+            # Store evaluation in session
+            if 'evaluations' not in session_data:
+                session_data['evaluations'] = []
+            session_data['evaluations'].append({
+                'question': arguments["question"],
+                'answer': arguments["answer"],
+                'evaluation': evaluation,
+                'timestamp': datetime.now().isoformat()
+            })
             return [TextContent(type="text", text=json.dumps(evaluation, indent=2))]
+        except Exception as e:
+            return [TextContent(type="text", text=f"Error: {str(e)}")]
+    
+    elif name == "start_interview":
+        try:
+            # Parse resume
+            resume_data = resume_parser.parse_resume(arguments["resume_path"])
+            role = arguments.get("role", "Software Engineer")
+            
+            # Generate questions
+            questions = ai_engine.generate_questions(resume_data, role)
+            
+            # Determine domain
+            domain_analysis = domain_matcher.determine_best_fit_domain(resume_data)
+            
+            # Store in session
+            session_data.update({
+                'resume_data': resume_data,
+                'questions': questions,
+                'role': role,
+                'domain_analysis': domain_analysis,
+                'evaluations': []
+            })
+            
+            result = {
+                'message': f'Interview started for {role} role',
+                'candidate': resume_data.get('name', 'Candidate'),
+                'questions_count': len(questions),
+                'domain': domain_analysis.get('primary_domain'),
+                'questions': questions
+            }
+            
+            return [TextContent(type="text", text=json.dumps(result, indent=2))]
+        except Exception as e:
+            return [TextContent(type="text", text=f"Error: {str(e)}")]
+    
+    elif name == "get_results":
+        try:
+            if 'evaluations' not in session_data or not session_data['evaluations']:
+                return [TextContent(type="text", text="No interview data available. Start an interview first.")]
+            
+            # Calculate overall score
+            evaluations = session_data['evaluations']
+            scores = [eval_data['evaluation']['overall_score'] for eval_data in evaluations]
+            avg_score = sum(scores) / len(scores)
+            
+            # Get job matches
+            resume_data = session_data.get('resume_data', {})
+            domain_analysis = session_data.get('domain_analysis', {})
+            
+            jobs = job_fetcher.fetch_jobs(
+                domain=domain_analysis.get('primary_domain', 'Software Development'),
+                skills=resume_data.get('skills', [])[:5],
+                ats_score=resume_data.get('ats_score', 0)
+            )
+            
+            results = {
+                'overall_score': round(avg_score, 1),
+                'total_questions': len(evaluations),
+                'domain_analysis': domain_analysis,
+                'job_matches': jobs[:5],
+                'detailed_evaluations': evaluations
+            }
+            
+            return [TextContent(type="text", text=json.dumps(results, indent=2))]
         except Exception as e:
             return [TextContent(type="text", text=f"Error: {str(e)}")]
     
