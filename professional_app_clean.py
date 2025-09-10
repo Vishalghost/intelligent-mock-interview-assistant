@@ -24,15 +24,13 @@ extreme_questions = ExtremeQuestions()
 advanced_evaluator = AdvancedEvaluator()
 resources_generator = ResourcesGenerator()
 job_matcher = JobMatcher()
-# Initialize DeepSeek AI with API
 ai_engine = OptimizedDeepSeekAI()
-ai_engine.toggle_ai(True)  # Enable AI API usage
+ai_engine.toggle_ai(True)
 voice_transcriber = VoiceTranscriber()
 print(f"DeepSeek AI initialized - API Status: {'ENABLED' if ai_engine.use_ai else 'DISABLED'}")
 print(f"Voice transcription: {'ENABLED' if voice_transcriber.model else 'DISABLED'}")
 report_generator = ReportGenerator()
 
-# Session storage
 professional_session = {}
 
 @app.route('/')
@@ -56,49 +54,40 @@ def upload_resume():
         file.save(filepath)
         
         try:
-            # Parse resume with enhanced parser
             candidate_data = resume_parser.parse_resume(filepath)
             
-            # Enhance with DeepSeek AI analysis
             try:
                 resume_text = resume_parser.extract_text(filepath)
                 ai_analysis = ai_engine.analyze_resume(resume_text)
                 if ai_analysis:
-                    # Merge AI analysis with parsed data
                     for key, value in ai_analysis.items():
                         if key not in candidate_data or not candidate_data[key]:
                             candidate_data[key] = value
-                    print(f"✅ AI-enhanced resume analysis completed")
+                    print("AI-enhanced resume analysis completed")
                 else:
-                    print(f"⚠️ AI analysis unavailable, using parser data only")
+                    print("AI analysis unavailable, using parser data only")
             except Exception as e:
-                print(f"❌ AI analysis failed: {e}")
+                print(f"AI analysis failed: {e}")
             
-            # Check readiness
             readiness_score = (candidate_data['ats_score'] + candidate_data['technical_depth']) / 2
             
-            # Prepare skills data for AI question generation
             skills_for_ai = candidate_data.get('skills', [])
             if isinstance(skills_for_ai, dict):
                 skills_for_ai = skills_for_ai.get('all_skills', [])
             
-            # Create AI-compatible resume data
             ai_resume_data = {
                 'skills': skills_for_ai,
                 'experience_years': candidate_data.get('experience_years', 0),
                 'name': candidate_data.get('name', 'Candidate')
             }
             
-            # Generate AI questions using DeepSeek API
-            print(f"🔄 Generating questions for {role} with DeepSeek API...")
+            print(f"Generating questions for {role} with DeepSeek API...")
             ai_questions = ai_engine.generate_questions(ai_resume_data, role)
-            print(f"✅ Generated {len(ai_questions)} questions")
+            print(f"Generated {len(ai_questions)} questions")
             
-            # Use AI-generated questions with fallback
             if ai_questions and len(ai_questions) > 0:
-                all_questions = ai_questions[:5]  # Limit to 5 high-quality questions
+                all_questions = ai_questions[:5]
             else:
-                # Fallback to extreme questions if AI fails
                 extreme_qs = extreme_questions.generate_extreme_questions(candidate_data, role)
                 all_questions = extreme_qs[:3]
             
@@ -112,14 +101,13 @@ def upload_resume():
                 'start_time': datetime.now().isoformat()
             })
             
-            # Create detailed response message with AI enhancement indicator
             skills_count = candidate_data.get('skills', {}).get('total_count', 0) if isinstance(candidate_data.get('skills'), dict) else len(candidate_data.get('skills', []))
-            ai_enhanced = "🤖 AI-Enhanced" if ai_analysis else "📋 Parser-Based"
+            ai_enhanced = "AI-Enhanced" if ai_analysis else "Parser-Based"
             message_parts = [
-                f"📊 {ai_enhanced} Analysis Complete for {candidate_data.get('name', 'Candidate')}",
-                f"🔧 {skills_count} skills identified",
-                f"⏱️ {candidate_data.get('experience_years', 0)} years experience",
-                f"📈 ATS Score: {candidate_data.get('ats_score', 0)}/100"
+                f"{ai_enhanced} Analysis Complete for {candidate_data.get('name', 'Candidate')}",
+                f"{skills_count} skills identified",
+                f"{candidate_data.get('experience_years', 0)} years experience",
+                f"ATS Score: {candidate_data.get('ats_score', 0)}/100"
             ]
             
             return jsonify({
@@ -157,9 +145,7 @@ def get_question():
 
 @app.route('/answer', methods=['POST'])
 def submit_answer():
-    # Handle both text and audio input
     if 'audio' in request.files:
-        # Voice input
         audio_file = request.files['audio']
         if audio_file:
             try:
@@ -167,13 +153,12 @@ def submit_answer():
                 answer = voice_transcriber.transcribe_audio_data(audio_data)
                 if not answer:
                     return jsonify({'error': 'Voice transcription failed'}), 400
-                print(f"🎤 Transcribed: {answer[:100]}...")
+                print(f"Transcribed: {answer[:100]}...")
             except Exception as e:
                 return jsonify({'error': f'Audio processing failed: {str(e)}'}), 400
         else:
             return jsonify({'error': 'No audio data received'}), 400
     else:
-        # Fallback text input (should not be used in voice-only mode)
         data = request.json
         answer = data.get('answer', '')
         if not answer:
@@ -191,12 +176,11 @@ def submit_answer():
     role = professional_session['role']
     candidate_data = professional_session['candidate_data']
     
-    # AI evaluation using DeepSeek API
-    print(f"🔄 Evaluating answer with DeepSeek API...")
+    print("Evaluating answer with DeepSeek API...")
     evaluation = ai_engine.evaluate_answer(
         question_data['question'], answer, role
     )
-    print(f"✅ Evaluation complete - Score: {evaluation.get('overall_score', 0)}/100")
+    print(f"Evaluation complete - Score: {evaluation.get('overall_score', 0)}/100")
     
     professional_session['evaluations'].append({
         'question_data': question_data,
@@ -220,17 +204,12 @@ def get_results():
     evaluations = professional_session['evaluations']
     candidate_data = professional_session['candidate_data']
     
-    # Calculate scores
     overall_scores = [eval_data['evaluation']['overall_score'] for eval_data in evaluations]
     avg_score = sum(overall_scores) / len(overall_scores)
     
-    # Generate final assessment
     final_assessment = generate_final_assessment(avg_score, evaluations)
-    
-    # Calculate dimension averages
     dimension_averages = calculate_dimension_averages(evaluations)
     
-    # Generate comprehensive resources
     combined_evaluation = {
         'overall_score': avg_score,
         'dimension_scores': dimension_averages,
@@ -242,7 +221,6 @@ def get_results():
         combined_evaluation, candidate_data, professional_session['role']
     )
     
-    # Job matching for high performers
     jobs = []
     if avg_score >= 70:
         jobs = job_matcher.fetch_jobs(
@@ -278,15 +256,12 @@ def download_report():
         return jsonify({'error': 'No completed interview'}), 400
     
     results = get_results().get_json()
-    
-    # Generate HTML report
     report_path = report_generator.save_html_report(results, "Candidate")
     
     return send_file(report_path, as_attachment=True, download_name=f"interview_report_{datetime.now().strftime('%Y%m%d')}.html")
 
 @app.route('/api/token-usage')
 def get_token_usage():
-    """Get current DeepSeek API token usage"""
     usage = ai_engine.get_token_usage()
     return jsonify({
         'token_usage': usage,
@@ -295,7 +270,6 @@ def get_token_usage():
     })
 
 def generate_final_assessment(avg_score, evaluations):
-    """Generate final assessment"""
     if avg_score >= 90:
         return {
             'level': 'EXCEPTIONAL - Senior+ Level',
@@ -338,7 +312,6 @@ def generate_final_assessment(avg_score, evaluations):
         }
 
 def calculate_dimension_averages(evaluations):
-    """Calculate average dimension scores"""
     dimensions = {}
     
     for eval_data in evaluations:
@@ -351,14 +324,12 @@ def calculate_dimension_averages(evaluations):
     return {dim: sum(scores)/len(scores) for dim, scores in dimensions.items()}
 
 def identify_improvement_areas(evaluations):
-    """Identify key improvement areas"""
     all_areas = []
     
     for eval_data in evaluations:
         improvement_roadmap = eval_data['evaluation'].get('improvement_roadmap', [])
         all_areas.extend(improvement_roadmap)
     
-    # Count frequency and return top areas
     area_counts = {}
     for area in all_areas:
         area_counts[area] = area_counts.get(area, 0) + 1
@@ -366,7 +337,6 @@ def identify_improvement_areas(evaluations):
     return sorted(area_counts.keys(), key=lambda x: area_counts[x], reverse=True)[:5]
 
 def calculate_duration():
-    """Calculate interview duration"""
     if 'start_time' in professional_session:
         start = datetime.fromisoformat(professional_session['start_time'])
         duration = (datetime.now() - start).total_seconds() / 60
@@ -375,7 +345,7 @@ def calculate_duration():
 
 if __name__ == '__main__':
     print("Starting Professional Interview Assessment Platform")
-    print(f"Server will run on http://localhost:5002")
-    print(f" DeepSeek AI Status: {'ENABLED' if ai_engine.use_ai else 'DISABLED'}")
-    print(f" Token Usage Endpoint: http://localhost:5002/api/token-usage")
+    print("Server will run on http://localhost:5002")
+    print(f"DeepSeek AI Status: {'ENABLED' if ai_engine.use_ai else 'DISABLED'}")
+    print("Token Usage Endpoint: http://localhost:5002/api/token-usage")
     app.run(debug=True, port=5002)
