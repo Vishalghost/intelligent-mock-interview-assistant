@@ -1,0 +1,22 @@
+# Environment variables
+.env
+*.env
+
+# SSL certificates
+cert.pem
+key.pem
+
+# Cache and temporary files
+ai_cache/
+uploads/
+__pycache__/
+*.pyc
+*.pyo
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db

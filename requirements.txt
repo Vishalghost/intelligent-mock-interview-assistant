@@ -1,0 +1,12 @@
+PyPDF2
+python-docx
+requests
+boto3
+openai
+flask
+mcp
+numpy
+textstat
+scikit-learn
+pandas
+werkzeug

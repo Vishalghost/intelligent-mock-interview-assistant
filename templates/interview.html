@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Mock Interview Assistant</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .card { background: white; border-radius: 12px; padding: 30px; margin: 20px 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn { padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; transition: all 0.3s; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-primary:hover { background: #0056b3; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .upload-zone { border: 2px dashed #007bff; border-radius: 8px; padding: 40px; text-align: center; cursor: pointer; }
+        .upload-zone:hover { background: #f8f9fa; }
+        .question-card { background: #e3f2fd; border-left: 4px solid #2196f3; padding: 20px; margin: 20px 0; }
+        .score { font-size: 24px; font-weight: bold; color: #28a745; }
+        .skill-tag { background: #007bff; color: white; padding: 2px 6px; border-radius: 4px; margin: 2px; font-size: 12px; display: inline-block; }
+        .analysis-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin: 15px 0; }
+        .hidden { display: none; }
+        .recording { background: #ff4444 !important; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+        .progress { width: 100%; height: 8px; background: #e9ecef; border-radius: 4px; overflow: hidden; }
+        .progress-bar { height: 100%; background: #007bff; transition: width 0.3s; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="text-align: center; color: #333; margin-bottom: 30px;">🎯 AI Mock Interview Assistant</h1>
+        
+        <!-- Step 1: Resume Upload -->
+        <div id="upload-section" class="card">
+            <h2>📄 Upload Your Resume</h2>
+            <div class="upload-zone" onclick="document.getElementById('resume-file').click()">
+                <input type="file" id="resume-file" accept=".pdf,.doc,.docx" style="display: none;">
+                <p>Click to upload or drag & drop your resume (PDF, DOC, DOCX)</p>
+            </div>
+            <div id="upload-status"></div>
+        </div>
+
+        <!-- Step 2: Role Selection -->
+        <div id="role-section" class="card hidden">
+            <h2>🎯 Select Target Role</h2>
+            <input type="text" id="role-input" placeholder="e.g., Senior Software Engineer, Data Scientist">
+            <button class="btn btn-primary" onclick="generateQuestions()">Generate Interview Questions</button>
+            <div id="generation-status"></div>
+        </div>
+
+        <!-- Step 3: Interview Interface -->
+        <div id="interview-section" class="card hidden">
+            <div class="progress">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div id="question-display" class="question-card"></div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <button id="record-btn" class="btn btn-success" onclick="toggleRecording()">🎤 Start Recording</button>
+                <button id="next-btn" class="btn btn-primary hidden" onclick="nextQuestion()">Next Question →</button>
+            </div>
+            
+            <div id="transcript-area">
+                <h4>Your Answer:</h4>
+                <textarea id="answer-text" rows="6" placeholder="Your answer will appear here as you speak..."></textarea>
+            </div>
+            
+            <div id="evaluation-display" class="hidden">
+                <h4>📊 Evaluation:</h4>
+                <div id="evaluation-content"></div>
+            </div>
+        </div>
+
+        <!-- Step 4: Final Report -->
+        <div id="report-section" class="card hidden">
+            <h2>📈 Interview Report</h2>
+            <div id="report-content"></div>
+        </div>
+    </div>
+
+    <script>
+        let sessionId = null;
+        let socket = null;
+        let mediaRecorder = null;
+        let isRecording = false;
+        let recognition = null;
+        let currentAnswer = '';
+
+        // Initialize speech recognition
+        if ('webkitSpeechRecognition' in window) {
+            recognition = new webkitSpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+            
+            recognition.onresult = function(event) {
+                let transcript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript;
+                }
+                document.getElementById('answer-text').value = transcript;
+                currentAnswer = transcript;
+            };
+        }
+
+        // File upload handler
+        document.getElementById('resume-file').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('resume', file);
+
+            document.getElementById('upload-status').innerHTML = '⏳ Parsing resume...';
+
+            fetch('/api/upload-resume', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById('upload-status').innerHTML = `❌ ${data.error}`;
+                } else {
+                    sessionId = data.session_id;
+                    
+                    // Display enhanced resume analysis
+                    let analysisHtml = `
+                        <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                            <h4>📊 Resume Analysis Results</h4>
+                            <p><strong>✅ ${data.message}</strong></p>
+                    `;
+                    
+                    if (data.resume_data.skills && data.resume_data.skills.technical_by_category) {
+                        analysisHtml += '<div style="margin-top: 10px;"><strong>🔧 Technical Skills:</strong><br>';
+                        for (const [category, skills] of Object.entries(data.resume_data.skills.technical_by_category)) {
+                            if (skills.length > 0) {
+                                const categoryName = category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                                analysisHtml += `<span style="background: #007bff; color: white; padding: 2px 6px; border-radius: 4px; margin: 2px; font-size: 12px;">${categoryName}: ${skills.join(', ')}</span><br>`;
+                            }
+                        }
+                        analysisHtml += '</div>';
+                    }
+                    
+                    if (data.resume_data.skills && data.resume_data.skills.soft_skills && data.resume_data.skills.soft_skills.length > 0) {
+                        analysisHtml += `<div style="margin-top: 8px;"><strong>💡 Soft Skills:</strong> ${data.resume_data.skills.soft_skills.join(', ')}</div>`;
+                    }
+                    
+                    analysisHtml += '</div>';
+                    
+                    document.getElementById('upload-status').innerHTML = analysisHtml;
+                    document.getElementById('role-section').classList.remove('hidden');
+                }
+            })
+            .catch(error => {
+                document.getElementById('upload-status').innerHTML = `❌ Upload failed: ${error}`;
+            });
+        });
+
+        function generateQuestions() {
+            const role = document.getElementById('role-input').value.trim();
+            if (!role) {
+                alert('Please enter a job role');
+                return;
+            }
+
+            document.getElementById('generation-status').innerHTML = '⏳ Generating personalized questions...';
+
+            fetch('/api/generate-questions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ session_id: sessionId, role: role })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById('generation-status').innerHTML = `❌ ${data.error}`;
+                } else {
+                    document.getElementById('generation-status').innerHTML = '✅ Questions ready!';
+                    startInterview();
+                }
+            });
+        }
+
+        function startInterview() {
+            document.getElementById('interview-section').classList.remove('hidden');
+            
+            // Initialize WebSocket
+            socket = io();
+            socket.emit('start_interview', { session_id: sessionId });
+            
+            socket.on('question', function(data) {
+                displayQuestion(data);
+            });
+            
+            socket.on('evaluating', function(data) {
+                document.getElementById('evaluation-display').innerHTML = '⏳ Evaluating your answer...';
+                document.getElementById('evaluation-display').classList.remove('hidden');
+            });
+            
+            socket.on('evaluation_complete', function(data) {
+                displayEvaluation(data.evaluation);
+                document.getElementById('next-btn').classList.remove('hidden');
+            });
+        }
+
+        function displayQuestion(data) {
+            const progress = (data.question_number / data.total_questions) * 100;
+            document.getElementById('progress-bar').style.width = progress + '%';
+            
+            document.getElementById('question-display').innerHTML = `
+                <h3>Question ${data.question_number} of ${data.total_questions}</h3>
+                <p><strong>${data.question.question}</strong></p>
+                <small>Category: ${data.question.category} | Difficulty: ${data.question.difficulty}</small>
+            `;
+            
+            // Reset UI
+            document.getElementById('answer-text').value = '';
+            document.getElementById('evaluation-display').classList.add('hidden');
+            document.getElementById('next-btn').classList.add('hidden');
+            currentAnswer = '';
+        }
+
+        function toggleRecording() {
+            const btn = document.getElementById('record-btn');
+            
+            if (!isRecording) {
+                // Start recording
+                if (recognition) {
+                    recognition.start();
+                }
+                btn.textContent = '⏹️ Stop Recording';
+                btn.classList.remove('btn-success');
+                btn.classList.add('btn-danger', 'recording');
+                isRecording = true;
+            } else {
+                // Stop recording
+                if (recognition) {
+                    recognition.stop();
+                }
+                btn.textContent = '🎤 Start Recording';
+                btn.classList.remove('btn-danger', 'recording');
+                btn.classList.add('btn-success');
+                isRecording = false;
+                
+                // Submit answer for evaluation
+                if (currentAnswer.trim()) {
+                    socket.emit('submit_answer', { 
+                        session_id: sessionId, 
+                        answer: currentAnswer 
+                    });
+                }
+            }
+        }
+
+        function displayEvaluation(evaluation) {
+            document.getElementById('evaluation-display').innerHTML = `
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                    <div class="score">Score: ${evaluation.overall_score}/100</div>
+                    <p><strong>Feedback:</strong> ${evaluation.detailed_feedback}</p>
+                    <p><strong>Decision:</strong> ${evaluation.hiring_decision.decision}</p>
+                </div>
+            `;
+            document.getElementById('evaluation-display').classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            fetch('/api/next-question', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ session_id: sessionId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.completed) {
+                    showFinalReport();
+                } else {
+                    displayQuestion(data);
+                }
+            });
+        }
+
+        function showFinalReport() {
+            document.getElementById('interview-section').classList.add('hidden');
+            
+            fetch(`/api/interview-report?session_id=${sessionId}`)
+            .then(response => response.json())
+            .then(data => {
+                let reportHtml = `
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <div class="score" style="font-size: 48px;">${data.overall_score}/100</div>
+                        <h3>Overall Recommendation: ${data.recommendation}</h3>
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                            <h4>📊 Performance Breakdown</h4>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 10px;">
+                                <div style="text-align: center; padding: 10px; background: white; border-radius: 6px;">
+                                    <div style="font-size: 24px; font-weight: bold; color: #007bff;">${data.total_questions}</div>
+                                    <div>Questions Answered</div>
+                                </div>
+                                <div style="text-align: center; padding: 10px; background: white; border-radius: 6px;">
+                                    <div style="font-size: 24px; font-weight: bold; color: #28a745;">${Math.round(data.overall_score)}%</div>
+                                    <div>Success Rate</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <h4>📝 Detailed Question Analysis:</h4>
+                `;
+                
+                data.answers.forEach((answer, index) => {
+                    const scoreColor = answer.evaluation.overall_score >= 80 ? '#28a745' : 
+                                      answer.evaluation.overall_score >= 60 ? '#ffc107' : '#dc3545';
+                    
+                    reportHtml += `
+                        <div style="border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid ${scoreColor};">
+                            <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 10px;">
+                                <h5 style="margin: 0; flex: 1;">Q${index + 1}: ${answer.question}</h5>
+                                <div style="background: ${scoreColor}; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;">
+                                    ${answer.evaluation.overall_score}/100
+                                </div>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 10px; border-radius: 4px; margin: 8px 0;">
+                                <strong>Your Answer:</strong><br>
+                                <em>${answer.answer || 'No answer provided'}</em>
+                            </div>
+                            <div style="margin-top: 10px;">
+                                <strong>💡 AI Feedback:</strong><br>
+                                ${answer.evaluation.detailed_feedback}
+                            </div>
+                            <div style="margin-top: 8px; font-size: 14px; color: #666;">
+                                <strong>Decision:</strong> ${answer.evaluation.hiring_decision.decision}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                document.getElementById('report-content').innerHTML = reportHtml;
+                document.getElementById('report-section').classList.remove('hidden');
+            });
+        }
+    </script>
+</body>
+</html>

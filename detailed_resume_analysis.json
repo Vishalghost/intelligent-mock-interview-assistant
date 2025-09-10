@@ -1,0 +1,85 @@
+{
+  "name": "VISHAL",
+  "email": "vishal.im05@gmail.com",
+  "phone": "('934', '236', '6220')",
+  "location": "\n \nQuantum\n \nComputing, AI",
+  "linkedin": "",
+  "github": "",
+  "skills": {
+    "all_skills": [
+      "Python",
+      "Java",
+      "Go",
+      "Scala",
+      "R",
+      "Django",
+      "Dynamodb",
+      "Aws",
+      "Azure",
+      "Docker",
+      "Leadership",
+      "Organized"
+    ],
+    "technical_by_category": {
+      "programming_languages": [
+        "Python",
+        "Java",
+        "Go",
+        "Scala",
+        "R"
+      ],
+      "web_technologies": [
+        "Django"
+      ],
+      "databases": [
+        "Dynamodb"
+      ],
+      "cloud_platforms": [
+        "Aws",
+        "Azure"
+      ],
+      "devops_tools": [
+        "Docker"
+      ],
+      "data_science": [],
+      "mobile_development": []
+    },
+    "soft_skills": [
+      "Leadership",
+      "Organized"
+    ],
+    "total_count": 12
+  },
+  "experience_years": 0,
+  "education": [
+    {
+      "degree": "ma",
+      "field": "\u2022",
+      "institution": ""
+    },
+    {
+      "degree": "MA",
+      "field": "Computer",
+      "institution": ""
+    },
+    {
+      "degree": "ms",
+      "field": "automation",
+      "institution": ""
+    }
+  ],
+  "certifications": [],
+  "projects": [],
+  "work_experience": [
+    {
+      "title": "AI",
+      "company": "scale"
+    }
+  ],
+  "languages": [],
+  "summary": "Computer\n \nScience\n \nundergraduate\n \nwith\n \nstrong\n \nfoundations\n \nin\n \ndata\n \nstructures,\n \nprogramming,\n \nand\n \ncloud\n \ndevelopment.\n \nExperienced\n \nin\n \nPython,\n \nJava,\n \nand\n \nC\n \nwith\n \nexposure\n \nto\n \nLinux\n \nenvironments.\n \nLeading\n \nAWS\n \nCloud\n \nClub\n \ninitiatives,\n \nmentoring\n \npeers,\n \nand\n \ncurrently\n \nbuilding\n \na\n \ncloud-native\n \napp\n \nto\n \nimprove\n \ncampus\n \noperations.\n \nEager\n \nto\n \nexplore\n \ndistributed\n \nsystems,\n \nautomation,\n \nand\n \nAI\n \nat\n \nscale\n \nthrough\n \nGoogle's\n \n202",
+  "ats_score": 80,
+  "technical_depth": 0,
+  "leadership_score": 26,
+  "raw_text": "VISHAL\n \nI.M\n \n \nvishal.im05@gmail.com\n \n\u2022\n \n \n(+91)\n \n9342366220\n \n\u2022\n \n \nvishal-i-m-136735315\n \n\u2022\n \n \nChennai, Tamilnadu, India\n \n \nSUMMARY\n \nComputer\n \nScience\n \nundergraduate\n \nwith\n \nstrong\n \nfoundations\n \nin\n \ndata\n \nstructures,\n \nprogramming,\n \nand\n \ncloud\n \ndevelopment.\n \nExperienced\n \nin\n \nPython,\n \nJava,\n \nand\n \nC\n \nwith\n \nexposure\n \nto\n \nLinux\n \nenvironments.\n \nLeading\n \nAWS\n \nCloud\n \nClub\n \ninitiatives,\n \nmentoring\n \npeers,\n \nand\n \ncurrently\n \nbuilding\n \na\n \ncloud-native\n \napp\n \nto\n \nimprove\n \ncampus\n \noperations.\n \nEager\n \nto\n \nexplore\n \ndistributed\n \nsystems,\n \nautomation,\n \nand\n \nAI\n \nat\n \nscale\n \nthrough\n \nGoogle's\n \n2026\n \nSoftware\n \nEngineering\n \nInternship.\n \n \nEDUCATION\n \nB.E.\n \nin\n \nComputer\n \nScience\n \nPanimalar\n \nEngineering\n \nCollege\n \nAug\n \n2024\n \n-\n \nMay\n \n2027\nDiploma\n \nin\n \nComputer\n \nEngineering\n \nKumaran\n \nPolytechnic\n \nCollege\n \nApr\n \n2021\n \n-\n \nMay\n \n2024\n \nCERTIFICATIONS\n \n\u25cf\n \nAWS\n \nCertified\n \nCloud\n \nPractitioner\n \n(CLF-C02)\n \n\u25cf\n \nMicrosoft\n \nAzure\n \nF"
+}
