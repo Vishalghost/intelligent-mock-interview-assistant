@@ -25,10 +25,11 @@ set /p API_KEY="API Key: "
 
 if "%API_KEY%"=="" (
     echo WARNING: No API key provided. Using demo mode.
-    set API_KEY=demo-key-disabled
+    set DEEPSEEK_API_KEY=demo-key-disabled
+) else (
+    set DEEPSEEK_API_KEY=%API_KEY%
+    echo API key set successfully!
 )
-
-set DEEPSEEK_API_KEY=%API_KEY%
 
 echo.
 echo [3/4] Generating SSL certificates for voice support...

@@ -4,6 +4,8 @@ from datetime import datetime
 from werkzeug.utils import secure_filename
 from optimized_deepseek import OptimizedDeepSeekAI
 from enhanced_resume_parser import EnhancedResumeParser
+from domain_matcher import DomainMatcher
+from live_job_fetcher import LiveJobFetcher
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
@@ -11,12 +13,19 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # Initialize components
 import os
-os.environ['DEEPSEEK_API_KEY'] = 'sk-08f86bbe2273464390e8bd115898ac84'
+# Get API key from environment variable
+api_key = os.getenv('DEEPSEEK_API_KEY')
+if not api_key:
+    print("WARNING: DEEPSEEK_API_KEY not set. Using demo mode.")
 ai_engine = OptimizedDeepSeekAI()
 ai_engine.toggle_ai(True)  # Force enable AI
 resume_parser = EnhancedResumeParser()
+domain_matcher = DomainMatcher()
+job_fetcher = LiveJobFetcher()
 print(f"DeepSeek API Status: {'ENABLED' if ai_engine.use_ai else 'DISABLED'}")
 print(f"Resume Parser: LOADED")
+print(f"Domain Matcher: LOADED")
+print(f"Job Fetcher: LOADED")
 
 @app.route('/')
 def index():
@@ -85,6 +94,9 @@ def upload_resume():
             'difficulty': 'basic'
         }]
     
+    # Determine best-fit domain
+    domain_analysis = domain_matcher.determine_best_fit_domain(candidate_data)
+    
     # Store in session
     global session_data
     session_data = {
@@ -92,7 +104,8 @@ def upload_resume():
         'questions': questions,
         'role': role,
         'current_question': 0,
-        'evaluations': []
+        'evaluations': [],
+        'domain_analysis': domain_analysis
     }
     
     return jsonify({
@@ -100,7 +113,7 @@ def upload_resume():
         'readiness_score': 72.5,
         'total_questions': len(questions),
         'warning_level': 'extreme',
-        'analysis_message': f'DeepSeek API Analysis | {len(questions)} AI questions generated | Role: {role} | API: {"ACTIVE" if ai_engine.use_ai else "FALLBACK"}'
+        'analysis_message': f'DeepSeek API Analysis | {len(questions)} AI questions generated | Role: {role} | Best Domain: {domain_analysis["primary_domain"]} ({domain_analysis["confidence"]:.0f}% confidence)'
     })
 
 session_data = {}
@@ -172,6 +185,19 @@ def get_results():
     overall_scores = [eval_data['evaluation']['overall_score'] for eval_data in evaluations]
     avg_score = sum(overall_scores) / len(overall_scores) if overall_scores else 0
     
+    # Fetch live job postings
+    domain_analysis = session_data.get('domain_analysis', {})
+    primary_domain = domain_analysis.get('primary_domain', 'Software Development')
+    candidate_skills = candidate_data.get('skills', [])
+    if isinstance(candidate_skills, dict):
+        candidate_skills = [skill for skills_list in candidate_skills.values() if isinstance(skills_list, list) for skill in skills_list]
+    
+    live_jobs = job_fetcher.fetch_jobs(
+        domain=primary_domain,
+        skills=candidate_skills[:10],  # Top 10 skills
+        ats_score=candidate_data.get('ats_score', 0)
+    )
+    
     # Generate assessment based on real scores
     if avg_score >= 80:
         final_assessment = {
@@ -207,7 +233,8 @@ def get_results():
         'dimension_analysis': evaluations[0]['evaluation']['dimension_scores'] if evaluations else {},
         'detailed_evaluations': evaluations,
         'candidate_profile': candidate_data,
-        'job_matches': [],
+        'job_matches': live_jobs,
+        'domain_analysis': domain_analysis,
         'personalized_resources': {
             'learning_path': ['Advanced Python', 'System Design'],
             'recommended_courses': ['Python Mastery', 'Architecture Patterns']
@@ -248,6 +275,26 @@ DIMENSION ANALYSIS:
     
     for dim, score in results_data['dimension_analysis'].items():
         report_content += f"{dim.replace('_', ' ').title()}: {score:.1f}/100\n"
+    
+    # Add domain analysis
+    if 'domain_analysis' in results_data:
+        domain = results_data['domain_analysis']
+        report_content += f"\nDOMAIN ANALYSIS:\n"
+        report_content += f"Primary Domain: {domain.get('primary_domain', 'N/A')}\n"
+        report_content += f"Confidence: {domain.get('confidence', 0):.1f}%\n"
+        report_content += f"Recommended Level: {domain.get('recommended_level', 'N/A')}\n"
+        if domain.get('alternative_domains'):
+            report_content += f"Alternative Domains: {', '.join(domain['alternative_domains'])}\n"
+    
+    # Add job matches
+    if results_data['job_matches']:
+        report_content += "\nLIVE JOB MATCHES:\n"
+        for i, job in enumerate(results_data['job_matches'][:5], 1):
+            report_content += f"\n{i}. {job.get('title', 'N/A')} at {job.get('company', 'N/A')}\n"
+            report_content += f"   Location: {job.get('location', 'N/A')}\n"
+            report_content += f"   Match Score: {job.get('match_score', 0):.0f}%\n"
+            if job.get('salary'):
+                report_content += f"   Salary: {job['salary']}\n"
     
     report_content += "\nDETAILED EVALUATIONS:\n"
     for i, eval_data in enumerate(results_data['detailed_evaluations'], 1):
