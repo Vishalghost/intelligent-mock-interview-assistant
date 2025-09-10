@@ -50,7 +50,7 @@ class OptimizedDeepSeekAI:
         try:
             response = self._api_call(
                 messages=[{"role": "user", "content": prompt}],
-                max_tokens=120,  # Reduced from original 150
+                max_tokens=200,  # Increased for 5 questions
                 temperature=0.7
             )
             
