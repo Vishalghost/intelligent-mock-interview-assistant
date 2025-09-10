@@ -1030,14 +1030,8 @@
 
         async function downloadReport() {
             try {
-                const response = await fetch('/download-report');
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `interview_assessment_report_${new Date().toISOString().split('T')[0]}.json`;
-                a.click();
-                window.URL.revokeObjectURL(url);
+                window.open('/download-report', '_blank');
+                showAlert('Report download started!', 'success');
             } catch (error) {
                 showAlert('Download failed: ' + error.message, 'error');
             }

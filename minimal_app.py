@@ -1,14 +1,22 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_file
 import os
+from datetime import datetime
+from werkzeug.utils import secure_filename
 from optimized_deepseek import OptimizedDeepSeekAI
+from enhanced_resume_parser import EnhancedResumeParser
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# Initialize DeepSeek AI
+# Initialize components
+import os
+os.environ['DEEPSEEK_API_KEY'] = 'sk-08f86bbe2273464390e8bd115898ac84'
 ai_engine = OptimizedDeepSeekAI()
+ai_engine.toggle_ai(True)  # Force enable AI
+resume_parser = EnhancedResumeParser()
 print(f"DeepSeek API Status: {'ENABLED' if ai_engine.use_ai else 'DISABLED'}")
+print(f"Resume Parser: LOADED")
 
 @app.route('/')
 def index():
@@ -16,26 +24,66 @@ def index():
 
 @app.route('/upload', methods=['POST'])
 def upload_resume():
+    if 'resume' not in request.files:
+        return jsonify({'error': 'No file uploaded'}), 400
+    
+    file = request.files['resume']
     role = request.form.get('role', 'Software Engineer')
     
-    # Mock candidate data
-    candidate_data = {
-        'name': 'Test Candidate',
-        'skills': ['Python', 'JavaScript', 'React'],
-        'experience_years': 3,
-        'ats_score': 75,
-        'technical_depth': 70,
-        'leadership_score': 60
-    }
+    if file.filename == '':
+        return jsonify({'error': 'No file selected'}), 400
     
-    # Generate real questions using DeepSeek API
-    ai_resume_data = {
-        'skills': candidate_data['skills'],
-        'experience_years': candidate_data['experience_years'],
-        'name': candidate_data['name']
-    }
+    if file and file.filename.lower().endswith(('.pdf', '.docx')):
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
+        
+        try:
+            # Parse the actual resume
+            print(f"Parsing resume: {filename}")
+            candidate_data = resume_parser.parse_resume(filepath)
+            print(f"Parsed candidate: {candidate_data.get('name', 'Unknown')}")
+            
+            # Enhance with AI analysis
+            resume_text = resume_parser.extract_text(filepath)
+            ai_analysis = ai_engine.analyze_resume(resume_text)
+            if ai_analysis:
+                for key, value in ai_analysis.items():
+                    if key not in candidate_data or not candidate_data[key]:
+                        candidate_data[key] = value
+                        
+        except Exception as e:
+            print(f"Resume parsing failed: {e}")
+            return jsonify({'error': f'Resume parsing failed: {str(e)}'}), 500
+    else:
+        return jsonify({'error': 'Invalid file format. Please upload PDF or DOCX'}), 400
     
-    questions = ai_engine.generate_questions(ai_resume_data, role)
+    try:
+        # Generate real questions using DeepSeek API
+        ai_resume_data = {
+            'skills': candidate_data.get('skills', []),
+            'experience_years': candidate_data.get('experience_years', 0),
+            'name': candidate_data.get('name', 'Candidate')
+        }
+        
+        print(f"Calling DeepSeek API for {role} questions...")
+        questions = ai_engine.generate_questions(ai_resume_data, role)
+        print(f"DeepSeek returned {len(questions)} questions")
+        
+        if not questions:
+            questions = [{
+                'question': f'Tell me about your experience in {role.lower()} development.',
+                'category': 'Experience',
+                'difficulty': 'intermediate'
+            }]
+            
+    except Exception as e:
+        print(f"Question generation failed: {e}")
+        questions = [{
+            'question': f'Describe your background in {role.lower()}.',
+            'category': 'General',
+            'difficulty': 'basic'
+        }]
     
     # Store in session
     global session_data
@@ -52,7 +100,7 @@ def upload_resume():
         'readiness_score': 72.5,
         'total_questions': len(questions),
         'warning_level': 'extreme',
-        'analysis_message': f'DeepSeek API Analysis | {len(questions)} questions generated | Role: {role}'
+        'analysis_message': f'DeepSeek API Analysis | {len(questions)} AI questions generated | Role: {role} | API: {"ACTIVE" if ai_engine.use_ai else "FALLBACK"}'
     })
 
 session_data = {}
@@ -93,9 +141,11 @@ def submit_answer():
     role = session_data['role']
     
     # Real DeepSeek API evaluation
+    print(f"Calling DeepSeek API for evaluation...")
     evaluation = ai_engine.evaluate_answer(
         question_data['question'], answer, role
     )
+    print(f"DeepSeek evaluation score: {evaluation.get('overall_score', 'N/A')}")
     
     session_data['evaluations'].append({
         'question_data': question_data,
@@ -164,12 +214,59 @@ def get_results():
         },
         'interview_metadata': {
             'total_questions': len(evaluations),
-            'completion_time': '2025-01-10T09:00:00',
+            'completion_time': datetime.now().isoformat(),
             'duration_minutes': 15,
             'difficulty_level': 'ADVANCED'
         }
     })
 
+@app.route('/download-report')
+def download_report():
+    if not session_data or 'evaluations' not in session_data:
+        return jsonify({'error': 'No completed interview'}), 400
+    
+    results_data = get_results().get_json()
+    
+    # Generate text report
+    report_content = f"""
+=== AI INTERVIEW ASSESSMENT REPORT ===
+Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+CANDIDATE PROFILE:
+Name: {results_data['candidate_profile']['name']}
+Experience: {results_data['candidate_profile']['experience_years']} years
+Skills: {', '.join(results_data['candidate_profile']['skills'])}
+
+PERFORMANCE SUMMARY:
+Overall Score: {results_data['performance_summary']['overall_score']}/100
+Level: {results_data['performance_summary']['final_assessment']['level']}
+Readiness: {results_data['performance_summary']['final_assessment']['readiness']}
+Timeline: {results_data['performance_summary']['final_assessment']['timeline']}
+
+DIMENSION ANALYSIS:
+"""
+    
+    for dim, score in results_data['dimension_analysis'].items():
+        report_content += f"{dim.replace('_', ' ').title()}: {score:.1f}/100\n"
+    
+    report_content += "\nDETAILED EVALUATIONS:\n"
+    for i, eval_data in enumerate(results_data['detailed_evaluations'], 1):
+        report_content += f"\nQuestion {i}: {eval_data['question_data']['question']}\n"
+        report_content += f"Answer: {eval_data['answer'][:200]}...\n"
+        report_content += f"Score: {eval_data['evaluation']['overall_score']}/100\n"
+        report_content += f"Feedback: {eval_data['evaluation']['detailed_feedback']}\n"
+    
+    # Save to file
+    filename = f"interview_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    
+    with open(filepath, 'w', encoding='utf-8') as f:
+        f.write(report_content)
+    
+    return send_file(filepath, as_attachment=True, download_name=filename)
+
 if __name__ == '__main__':
-    print("Starting minimal app")
+    print("Starting AI Interview Assistant")
+    print("Visit: http://localhost:5002")
+    print("Upload resume -> Answer questions -> Download report")
     app.run(debug=True, port=5002)

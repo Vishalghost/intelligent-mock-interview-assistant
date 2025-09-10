@@ -1,125 +1,173 @@
 # 🎯 AI-Powered Interview Assistant
 
-Advanced interview preparation platform with voice recognition, AI evaluation, and comprehensive feedback.
+> **Advanced interview preparation platform with voice recognition, AI evaluation, and comprehensive feedback.**
 
-## ✨ Features
+![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
+![Flask](https://img.shields.io/badge/Flask-2.3+-green.svg)
+![DeepSeek](https://img.shields.io/badge/AI-DeepSeek-orange.svg)
+![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
-- **🎤 Voice-Only Interface** - Speak your answers naturally
-- **🤖 AI-Powered Evaluation** - DeepSeek API integration for intelligent scoring
-- **📄 Resume Analysis** - Extract skills and experience from PDF/DOCX
-- **📊 Multi-Dimensional Scoring** - 6 key performance dimensions
-- **🎯 Personalized Questions** - Role-specific interview questions
-- **📈 Detailed Reports** - Comprehensive assessment with improvement suggestions
+## ✨ Key Features
+
+| Feature | Description |
+|---------|-------------|
+| 🎤 **Voice Interface** | Speak your answers naturally - no typing required |
+| 🤖 **AI Evaluation** | DeepSeek API integration for intelligent scoring |
+| 📄 **Resume Analysis** | Extract skills and experience from PDF/DOCX files |
+| 📊 **Multi-Dimensional Scoring** | 6 key performance dimensions analysis |
+| 🎯 **Personalized Questions** | Role-specific interview questions |
+| 📈 **Detailed Reports** | Comprehensive assessment with improvement suggestions |
 
 ## 🚀 Quick Start
 
-### Option 1: Easy Setup (Recommended)
-1. **Download and run the setup file:**
-   ```bash
-   # Double-click: setup_and_run.bat
-   ```
+### 🎯 **One-Click Setup** (Recommended)
+```bash
+# Just double-click this file:
+setup_and_run.bat
+```
 
-### Option 2: Manual Setup
-1. **Install dependencies:**
-   ```bash
-   pip install -r requirements_voice.txt
-   ```
+### ⚡ **Instant Demo**
+```bash
+# Quick test without setup:
+quick_start.bat
+```
 
-2. **Set your DeepSeek API key:**
-   ```bash
-   set DEEPSEEK_API_KEY=your_api_key_here
-   ```
+### 🛠️ **Manual Setup**
+```bash
+# 1. Install dependencies
+pip install flask requests PyPDF2 python-docx cryptography
 
-3. **Run the application:**
-   ```bash
-   python minimal_app.py
-   ```
+# 2. Set API key
+set DEEPSEEK_API_KEY=your_api_key_here
 
-4. **Open your browser:**
-   ```
-   http://localhost:5002
-   ```
+# 3. Run application
+python minimal_app.py
+
+# 4. Open browser
+# http://localhost:5002
+```
 
 ## 🔧 Configuration
 
-### DeepSeek API Setup
-1. Get your API key from [DeepSeek](https://platform.deepseek.com/)
-2. Set environment variable: `DEEPSEEK_API_KEY=your_key`
-3. Or edit the setup file with your key
+### 🔑 **DeepSeek API Setup**
+1. **Get API Key**: Visit [DeepSeek Platform](https://platform.deepseek.com/)
+2. **Set Environment Variable**: 
+   ```bash
+   set DEEPSEEK_API_KEY=your_api_key_here
+   ```
+3. **Or use setup file**: `setup_and_run.bat` will prompt for your key
 
-### HTTPS for Voice (Optional)
-For full voice functionality:
+### 🔒 **HTTPS for Voice** (Optional)
 ```bash
+# Generate SSL certificates for voice features
 python generate_cert.py
 python start_secure.py
-# Visit: https://localhost:5002
+
+# Then visit: https://localhost:5002
 ```
 
 ## 📁 Project Structure
 
 ```
-├── minimal_app.py              # 🎯 Main application (start here)
-├── professional_app_clean.py   # 🔧 Full-featured version
-├── mcp_server.py              # 🤖 MCP server for Amazon Q CLI
-├── templates/                 # 🎨 Web interface
-├── static/                    # 💄 CSS/JS assets
-├── enhanced_resume_parser.py  # 📄 Resume processing
-├── optimized_deepseek.py      # 🤖 AI integration
-└── setup_and_run.bat         # 🚀 One-click setup
+📦 intelligent-mock-interview-assistant
+├── 🚀 setup_and_run.bat          # One-click installation
+├── ⚡ quick_start.bat             # Instant demo
+├── 🤖 run_mcp_server.bat         # MCP server for Amazon Q
+├── 🎯 minimal_app.py              # Main application
+├── 🔧 professional_app_clean.py   # Full-featured version
+├── 📄 enhanced_resume_parser.py   # Resume processing
+├── 🤖 optimized_deepseek.py       # AI integration
+├── 📁 templates/                  # Web interface
+└── 📁 static/                     # CSS/JS assets
 ```
 
-## 🎮 Usage
+## 🎮 How to Use
 
-1. **Upload Resume** - PDF or DOCX format
-2. **Select Role** - Choose your target position
-3. **Voice Interview** - Speak your answers (or type)
-4. **Get Results** - Detailed evaluation and feedback
-5. **Download Report** - Comprehensive assessment PDF
+| Step | Action | Description |
+|------|--------|-------------|
+| 1️⃣ | **Upload Resume** | PDF or DOCX format supported |
+| 2️⃣ | **Select Role** | Choose your target job position |
+| 3️⃣ | **Voice Interview** | Speak your answers naturally |
+| 4️⃣ | **Get Results** | Detailed AI evaluation and feedback |
+| 5️⃣ | **Download Report** | Comprehensive assessment PDF |
 
-## 🔌 MCP Server Integration
+### 🎤 **Voice Features**
+- **Browser-based**: No additional software needed
+- **Real-time**: Instant speech-to-text conversion
+- **HTTPS required**: For security and browser compatibility
 
-For Amazon Q CLI integration:
+## 🔌 Amazon Q CLI Integration
+
+### 🤖 **MCP Server**
 ```bash
+# Start MCP server
+run_mcp_server.bat
+
+# Or manually:
 python mcp_server.py
 ```
 
-Available tools:
-- `analyze_resume` - Parse resume files
-- `generate_questions` - Create interview questions
-- `evaluate_answer` - Score responses
+### 🛠️ **Available Tools**
+| Tool | Function | Description |
+|------|----------|-------------|
+| `analyze_resume` | Resume parsing | Extract skills and experience |
+| `generate_questions` | Question creation | Role-specific interview questions |
+| `evaluate_answer` | Answer scoring | AI-powered evaluation |
 
 ## 🛠️ Troubleshooting
 
-**Voice not working?**
-- Use HTTPS: `python start_secure.py`
-- Allow microphone permissions in browser
+### ❌ **Common Issues**
 
-**API errors?**
-- Check your DeepSeek API key
-- Verify internet connection
+| Problem | Solution |
+|---------|----------|
+| 🎤 **Voice not working** | Use HTTPS: `python start_secure.py` <br> Allow microphone permissions |
+| 🔑 **API errors** | Check DeepSeek API key <br> Verify internet connection |
+| 📦 **Import errors** | Run: `pip install -r requirements_voice.txt` |
+| 🌐 **SSL errors** | Delete `cert.pem` and `key.pem`, regenerate |
+| 💻 **Encoding issues** | Use `setup_and_run.bat` for automatic handling |
 
-**Import errors?**
-- Run: `pip install -r requirements_voice.txt`
+## 📊 AI Evaluation Dimensions
 
-## 📊 Evaluation Dimensions
+| Dimension | Focus Area | Weight |
+|-----------|------------|--------|
+| 🔧 **Technical Mastery** | Domain expertise and knowledge | 25% |
+| 🧠 **Problem Solving** | Analytical and critical thinking | 20% |
+| 💬 **Communication** | Clarity and articulation skills | 20% |
+| 💡 **Innovation** | Creative and novel solutions | 15% |
+| 👥 **Leadership** | Team and project management | 10% |
+| 🏗️ **System Thinking** | Architecture and design approach | 10% |
 
-1. **Technical Mastery** - Domain expertise
-2. **Problem Solving** - Analytical thinking
-3. **Communication** - Clarity and articulation
-4. **Innovation** - Creative solutions
-5. **Leadership** - Team and project management
-6. **System Thinking** - Architecture and design
+## 🚀 Getting Started
+
+### 🎯 **Ready to ace your interview?**
+
+1. **Clone this repository**
+2. **Double-click `setup_and_run.bat`**
+3. **Enter your DeepSeek API key**
+4. **Start practicing!**
+
+---
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create feature branch
-3. Submit pull request
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## 📄 License
 
-MIT License - See LICENSE file for details
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-**Ready to ace your next interview? Run `setup_and_run.bat` and get started! 🚀**
+<div align="center">
+
+### 🎯 **Ready to ace your next interview?**
+
+**Just run `setup_and_run.bat` and get started!**
+
+[![Get Started](https://img.shields.io/badge/Get%20Started-Now-brightgreen.svg?style=for-the-badge)](setup_and_run.bat)
+
+</div>
