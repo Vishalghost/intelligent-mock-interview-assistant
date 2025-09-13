@@ -7,13 +7,13 @@ echo      Quick Start (No Setup)
 echo ========================================
 echo.
 
-echo Starting AI Interview Assistant...
+echo Starting Minimal Interview Assistant...
 echo.
 echo Web Interface: http://localhost:5002
 echo.
-echo Note: For full AI features, run setup_and_run.bat first
+echo Note: No external AI dependencies required
 echo.
 
-python minimal_app.py
+python minimal_web_app.py
 
 pause
