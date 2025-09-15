@@ -178,17 +178,13 @@ class EnhancedResumeParser:
             'soft': []
         }
         
-        # Extract technical skills by category
+        # Extract technical skills by category (optimized)
         for category, skills_list in self.technical_skills.items():
-            found_skills['technical'][category] = []
-            for skill in skills_list:
-                if skill in text_lower:
-                    found_skills['technical'][category].append(skill.title())
+            category_skills = [skill.title() for skill in skills_list if skill in text_lower]
+            found_skills['technical'][category] = category_skills
         
-        # Extract soft skills
-        for skill in self.soft_skills:
-            if skill in text_lower:
-                found_skills['soft'].append(skill.title())
+        # Extract soft skills (list comprehension for better performance)
+        found_skills['soft'] = [skill.title() for skill in self.soft_skills if skill in text_lower]
         
         # Flatten technical skills for backward compatibility
         all_technical = []
@@ -262,13 +258,17 @@ class EnhancedResumeParser:
 
     def _extract_institution_near_degree(self, text: str, degree: str) -> str:
         """Extract institution name near degree mention"""
-        # This is a simplified approach - in practice, you'd want more sophisticated parsing
         lines = text.split('\n')
+        degree_lower = degree.lower()
+        institution_keywords = {'university', 'college', 'institute', 'school'}
+        
         for i, line in enumerate(lines):
-            if degree.lower() in line.lower():
-                # Look in surrounding lines for university/college
-                for j in range(max(0, i-2), min(len(lines), i+3)):
-                    if any(keyword in lines[j].lower() for keyword in ['university', 'college', 'institute', 'school']):
+            if degree_lower in line.lower():
+                # Look in surrounding lines (limited window for performance)
+                search_range = range(max(0, i-2), min(len(lines), i+3))
+                for j in search_range:
+                    line_lower = lines[j].lower()
+                    if any(keyword in line_lower for keyword in institution_keywords):
                         return lines[j].strip()
         return ""
 

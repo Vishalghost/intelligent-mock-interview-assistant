@@ -1,6 +1,8 @@
 from datetime import datetime
 import json
 import os
+import re
+from werkzeug.utils import secure_filename
 
 class ReportGenerator:
     def generate_html_report(self, results_data, candidate_name="Candidate"):
@@ -119,15 +121,56 @@ class ReportGenerator:
     
     def save_html_report(self, results_data, candidate_name="Candidate"):
         """Save HTML report to file"""
-        html_content = self.generate_html_report(results_data, candidate_name)
-        
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        filename = f"interview_report_{candidate_name}_{timestamp}.html"
-        filepath = os.path.join('reports', filename)
-        
-        os.makedirs('reports', exist_ok=True)
-        
-        with open(filepath, 'w', encoding='utf-8') as f:
-            f.write(html_content)
+        try:
+            html_content = self.generate_html_report(results_data, candidate_name)
             
-        return filepath
+            # Sanitize candidate name for filename
+            safe_name = self._sanitize_filename(candidate_name)
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            filename = f"interview_report_{safe_name}_{timestamp}.html"
+            
+            # Ensure reports directory exists
+            reports_dir = 'reports'
+            os.makedirs(reports_dir, exist_ok=True)
+            
+            # Create secure filepath
+            filepath = os.path.join(reports_dir, filename)
+            
+            # Validate the final path is within reports directory
+            if not self._is_safe_path(reports_dir, filepath):
+                raise ValueError("Invalid file path")
+            
+            with open(filepath, 'w', encoding='utf-8') as f:
+                f.write(html_content)
+                
+            return filepath
+            
+        except (IOError, OSError, PermissionError) as e:
+            print(f"File operation error: {e}")
+            raise
+        except Exception as e:
+            print(f"Report generation error: {e}")
+            raise
+    
+    def _sanitize_filename(self, name):
+        """Sanitize filename to prevent path traversal"""
+        if not name or not isinstance(name, str):
+            return "Candidate"
+        
+        # Remove any path separators and dangerous characters
+        safe_name = re.sub(r'[<>:"/\\|?*]', '', name)
+        safe_name = secure_filename(safe_name)
+        
+        # Limit length and ensure it's not empty
+        safe_name = safe_name[:50] if safe_name else "Candidate"
+        
+        return safe_name
+    
+    def _is_safe_path(self, basedir, path):
+        """Check if path is within the base directory"""
+        try:
+            base = os.path.abspath(basedir)
+            target = os.path.abspath(path)
+            return target.startswith(base + os.sep) or target == base
+        except (ValueError, OSError):
+            return False

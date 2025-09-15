@@ -1,12 +1,42 @@
-PyPDF2
-python-docx
-requests
-boto3
-openai
-flask
-mcp
-numpy
-textstat
-scikit-learn
-pandas
-werkzeug
+# Core Flask Dependencies
+Flask>=2.3.3
+Flask-WTF>=1.1.1
+Werkzeug>=2.3.7
+
+# Environment Management
+python-dotenv>=1.0.0
+
+# File Processing
+PyPDF2>=3.0.1
+python-docx>=0.8.11
+
+# AI and ML Dependencies
+transformers>=4.35.0
+torch>=2.1.0
+torchaudio>=2.1.0
+
+# HTTP Requests (Updated for security)
+requests>=2.32.4
+
+# MCP Protocol
+mcp>=0.1.0
+
+# Audio Processing
+speechrecognition>=3.10.0
+pydub>=0.25.1
+librosa>=0.10.1
+
+# Data Processing
+pandas>=2.1.0
+numpy>=1.24.0
+
+# Async Support
+asyncio-mqtt>=0.13.0
+
+# Development Dependencies (Optional)
+pytest>=7.4.0
+black>=23.0.0
+flake8>=6.0.0
+
+# Security
+cryptography>=41.0.0

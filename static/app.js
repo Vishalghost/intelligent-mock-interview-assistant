@@ -58,14 +58,22 @@ class InterviewAssistant {
     }
 
     autoSave() {
-        const answer = document.getElementById('answer').value;
-        localStorage.setItem('currentAnswer', answer);
+        try {
+            const answer = document.getElementById('answer').value;
+            localStorage.setItem('currentAnswer', answer);
+        } catch (error) {
+            console.warn('Failed to save to localStorage:', error);
+        }
     }
 
     restoreAnswer() {
-        const saved = localStorage.getItem('currentAnswer');
-        if (saved) {
-            document.getElementById('answer').value = saved;
+        try {
+            const saved = localStorage.getItem('currentAnswer');
+            if (saved) {
+                document.getElementById('answer').value = saved;
+            }
+        } catch (error) {
+            console.warn('Failed to restore from localStorage:', error);
         }
     }
 
@@ -173,11 +181,22 @@ class InterviewAssistant {
     showAlert(message, type) {
         const alertDiv = document.createElement('div');
         alertDiv.className = `alert alert-${type}`;
+        
+        // Sanitize message to prevent XSS
+        const sanitizedMessage = this.sanitizeHTML(message);
+        
+        const icon = type === 'error' ? 'exclamation-triangle' : 'check-circle';
         alertDiv.innerHTML = `
-            <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : 'check-circle'}"></i> 
-            ${message}
-            <button onclick="this.parentElement.remove()" style="float: right; background: none; border: none; font-size: 18px; cursor: pointer;">&times;</button>
+            <i class="fas fa-${icon}"></i> 
+            ${sanitizedMessage}
         `;
+        
+        // Create close button with event listener instead of onclick
+        const closeBtn = document.createElement('button');
+        closeBtn.innerHTML = '&times;';
+        closeBtn.style.cssText = 'float: right; background: none; border: none; font-size: 18px; cursor: pointer;';
+        closeBtn.addEventListener('click', () => alertDiv.remove());
+        alertDiv.appendChild(closeBtn);
         
         const container = document.querySelector('.container');
         container.insertBefore(alertDiv, container.firstChild);
@@ -189,6 +208,12 @@ class InterviewAssistant {
             }
         }, 5000);
     }
+    
+    sanitizeHTML(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
 
     async submitAnswer() {
         const answer = document.getElementById('answer').value.trim();
@@ -198,14 +223,24 @@ class InterviewAssistant {
         }
         
         // Clear auto-saved answer
-        localStorage.removeItem('currentAnswer');
+        try {
+            localStorage.removeItem('currentAnswer');
+        } catch (error) {
+            console.warn('Failed to clear localStorage:', error);
+        }
         
         this.showLoading('AI is evaluating your response...');
         
         try {
+            // Get CSRF token
+            const csrfToken = document.querySelector('meta[name=csrf-token]')?.getAttribute('content');
+            
             const response = await fetch('/answer', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
                 body: JSON.stringify({ answer })
             });
             
@@ -277,7 +312,18 @@ class InterviewAssistant {
 
     async loadNextQuestion() {
         try {
-            const response = await fetch('/question');
+            const csrfToken = document.querySelector('meta[name=csrf-token]')?.getAttribute('content');
+            
+            const response = await fetch('/question', {
+                headers: {
+                    'X-CSRFToken': csrfToken
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
             const data = await response.json();
             
             if (data.completed) {
@@ -288,10 +334,18 @@ class InterviewAssistant {
             const progress = (data.question_number / data.total_questions) * 100;
             document.getElementById('question-progress').style.width = progress + '%';
             
-            document.getElementById('question-container').innerHTML = `
-                <h3><i class="fas fa-question"></i> Question ${data.question_number} of ${data.total_questions}</h3>
-                <p style="font-size: 1.1em; line-height: 1.6;">${data.question}</p>
-            `;
+            const questionContainer = document.getElementById('question-container');
+            questionContainer.innerHTML = '';
+            
+            const questionHeader = document.createElement('h3');
+            questionHeader.innerHTML = `<i class="fas fa-question"></i> Question ${data.question_number} of ${data.total_questions}`;
+            
+            const questionText = document.createElement('p');
+            questionText.style.cssText = 'font-size: 1.1em; line-height: 1.6;';
+            questionText.textContent = data.question;
+            
+            questionContainer.appendChild(questionHeader);
+            questionContainer.appendChild(questionText);
             
             document.getElementById('answer').value = '';
             this.restoreAnswer(); // Restore any auto-saved content
@@ -305,7 +359,18 @@ class InterviewAssistant {
         this.showLoading('Generating your final report...');
         
         try {
-            const response = await fetch('/results');
+            const csrfToken = document.querySelector('meta[name=csrf-token]')?.getAttribute('content');
+            
+            const response = await fetch('/results', {
+                headers: {
+                    'X-CSRFToken': csrfToken
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
             const data = await response.json();
             
             this.hideLoading();
@@ -325,14 +390,42 @@ class InterviewAssistant {
         const avgScore = data.average_score.toFixed(1);
         const scoreClass = avgScore >= 80 ? 'score-excellent' : avgScore >= 60 ? 'score-good' : 'score-poor';
         
-        const jobsHtml = data.job_matches && data.job_matches.length > 0 ? 
-            data.job_matches.map(job => `
-                <li class="job-item">
-                    <strong>${job.title || job.position || 'Position Available'}</strong><br>
-                    <span style="color: #666;">${job.company || 'Company'}</span>
-                    ${job.match_score ? `<span style="float: right; color: #4CAF50;">${job.match_score.toFixed(0)}% match</span>` : ''}
-                </li>
-            `).join('') : '<li class="job-item">No matching jobs found at this time</li>';
+        const jobsList = document.createElement('ul');
+        jobsList.className = 'job-list';
+        
+        if (data.job_matches && data.job_matches.length > 0) {
+            data.job_matches.forEach(job => {
+                const jobItem = document.createElement('li');
+                jobItem.className = 'job-item';
+                
+                const title = document.createElement('strong');
+                title.textContent = job.title || job.position || 'Position Available';
+                
+                const company = document.createElement('span');
+                company.style.color = '#666';
+                company.textContent = job.company || 'Company';
+                
+                jobItem.appendChild(title);
+                jobItem.appendChild(document.createElement('br'));
+                jobItem.appendChild(company);
+                
+                if (job.match_score) {
+                    const matchScore = document.createElement('span');
+                    matchScore.style.cssText = 'float: right; color: #4CAF50;';
+                    matchScore.textContent = `${job.match_score.toFixed(0)}% match`;
+                    jobItem.appendChild(matchScore);
+                }
+                
+                jobsList.appendChild(jobItem);
+            });
+        } else {
+            const noJobsItem = document.createElement('li');
+            noJobsItem.className = 'job-item';
+            noJobsItem.textContent = 'No matching jobs found at this time';
+            jobsList.appendChild(noJobsItem);
+        }
+        
+        const jobsHtml = jobsList.outerHTML;
         
         document.getElementById('results-data').innerHTML = `
             <div class="score-display ${scoreClass}">
