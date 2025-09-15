@@ -511,6 +511,22 @@
         let recognition = null;
         let finalTranscript = '';
 
+        // Initialize speech recognition immediately
+        try {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                recognition.lang = 'en-US';
+            } else {
+                showAlert('Speech recognition is not supported in your browser', 'error');
+            }
+        } catch (e) {
+            console.error('Speech recognition initialization error:', e);
+            showAlert('Failed to initialize speech recognition', 'error');
+        }
+
         // Initialize speech recognition
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -521,7 +537,6 @@
             
             recognition.onresult = function(event) {
                 let interimTranscript = '';
-                finalTranscript = '';
                 
                 for (let i = event.resultIndex; i < event.results.length; i++) {
                     const transcript = event.results[i][0].transcript;
@@ -532,8 +547,9 @@
                     }
                 }
                 
-                document.getElementById('transcript-text').innerHTML = 
-                    finalTranscript + '<span style="color: #999;">' + interimTranscript + '</span>';
+                const transcriptDiv = document.getElementById('transcript-text');
+                transcriptDiv.innerHTML = finalTranscript + '<span style="color: #999;">' + interimTranscript + '</span>';
+                document.getElementById('transcript-section').classList.remove('hidden');
             };
         }
 
@@ -965,7 +981,7 @@
 
         // Download report
         document.getElementById('download-report-btn').onclick = () => {
-            window.location.href = '/download_voice_report';
+            window.location.href = '/download_report';
         };
 
         function showLoading(title, subtitle) {

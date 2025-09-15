@@ -1,0 +1,48 @@
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isRecording = false;
+        let recognition = null;
+        let finalTranscript = '';
+
+        // Initialize speech recognition
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+            
+            recognition.onstart = function() {
+                console.log('Speech recognition started');
+                document.getElementById('transcript-section').classList.remove('hidden');
+                document.getElementById('transcript-text').textContent = 'Listening...';
+            };
+            
+            recognition.onresult = function(event) {
+                let interimTranscript = '';
+                finalTranscript = ''; // Reset finalTranscript for each new result
+                
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript + ' ';
+                    } else {
+                        interimTranscript += transcript;
+                    }
+                }
+                
+                const transcriptDiv = document.getElementById('transcript-text');
+                if (transcriptDiv) {
+                    transcriptDiv.innerHTML = finalTranscript + '<span style="color: #999;">' + interimTranscript + '</span>';
+                }
+            };
+            
+            recognition.onerror = function(event) {
+                console.error('Speech recognition error:', event.error);
+                showAlert('Speech recognition error: ' + event.error, 'error');
+            };
+
+            recognition.onend = function() {
+                console.log('Speech recognition ended');
+            };
+        }

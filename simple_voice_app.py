@@ -335,8 +335,12 @@ def upload_voice_answer():
         session_id = get_session_id()
         session_data = get_session_data(session_id)
         
+        # Initialize session data if not present
         if 'interview_questions' not in session_data:
             return jsonify({'error': 'No active interview session'}), 400
+            
+        if 'voice_evaluations' not in session_data:
+            session_data['voice_evaluations'] = []
         
         # Get text answer instead of audio for simplicity
         answer_text = request.form.get('answer_text', 'Sample answer for demonstration')
@@ -396,8 +400,9 @@ def complete_voice_interview():
     session_id = get_session_id()
     session_data = get_session_data(session_id)
     
-    if 'voice_evaluations' not in session_data or not session_data['voice_evaluations']:
-        return jsonify({'error': 'No interview data available'}), 400
+    # Initialize voice_evaluations if not present
+    if 'voice_evaluations' not in session_data:
+        session_data['voice_evaluations'] = []
     
     try:
         evaluations = session_data['voice_evaluations']
@@ -449,4 +454,37 @@ if __name__ == '__main__':
     print("Upload resume -> Answer questions -> Get report")
     print("=" * 50)
     
+    # Add report download route
+    @app.route('/download_report')
+    def download_report():
+        """Download interview report"""
+        session_id = get_session_id()
+        session_data = get_session_data(session_id)
+        
+        # Create basic report if none exists
+        if 'voice_evaluations' not in session_data:
+            session_data['voice_evaluations'] = []
+            
+        # Generate report content
+        report_content = "AI Voice Interview Report\n"
+        report_content += "=" * 30 + "\n\n"
+        report_content += f"Session ID: {session_id}\n"
+        report_content += f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+        
+        # Add evaluations
+        for i, eval_data in enumerate(session_data.get('voice_evaluations', []), 1):
+            report_content += f"\nQuestion {i}:\n"
+            report_content += "-" * 20 + "\n"
+            report_content += f"Question: {eval_data.get('question_data', {}).get('question', 'N/A')}\n"
+            report_content += f"Answer: {eval_data.get('answer', 'N/A')}\n"
+            report_content += f"Score: {eval_data.get('evaluation', {}).get('overall_score', 0)}/100\n"
+            report_content += f"Feedback: {eval_data.get('evaluation', {}).get('detailed_feedback', 'N/A')}\n"
+        
+        # Create temporary file
+        report_file = os.path.join(app.config['UPLOAD_FOLDER'], f'interview_report_{session_id[:8]}.txt')
+        with open(report_file, 'w') as f:
+            f.write(report_content)
+        
+        return send_file(report_file, as_attachment=True, download_name='interview_report.txt')
+
     app.run(debug=True, port=5003, host='127.0.0.1')
