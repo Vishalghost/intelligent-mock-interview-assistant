@@ -1,63 +1,60 @@
 # 🎯 AI-Powered Voice Interview Assistant
 
-> **Secure interview preparation platform with Hugging Face AI models, voice recognition, and comprehensive evaluation.**
+> **Complete interview preparation platform with real job matching, AI analysis, and voice evaluation.**
 
 ![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
 ![Flask](https://img.shields.io/badge/Flask-2.3+-green.svg)
-![HuggingFace](https://img.shields.io/badge/AI-HuggingFace-orange.svg)
-![Security](https://img.shields.io/badge/Security-Hardened-red.svg)
-![License](https://img.shields.io/badge/License-MIT-green.svg)
+![AWS](https://img.shields.io/badge/AWS-Amazon%20Q-orange.svg)
+![Jobs](https://img.shields.io/badge/Jobs-Real%20API-green.svg)
+![License](https://img.shields.io/badge/License-MIT-blue.svg)
 
 ## ✨ Key Features
 
 | Feature | Description |
 |---------|-------------|
-| 🎤 **Voice Interface** | Speak your answers naturally with real-time transcription |
-| 🤖 **Hugging Face AI** | Advanced NLP models for resume parsing and evaluation |
-| 📄 **Smart Resume Analysis** | AI-powered skill extraction and ATS scoring |
-| 📊 **Multi-Dimensional Scoring** | 6 key performance dimensions with voice analysis |
-| 🎯 **Personalized Questions** | AI-generated role-specific interview questions |
-| 📈 **Comprehensive Reports** | Detailed assessment with job recommendations |
-| 🌐 **Amazon Q CLI** | Command-line integration with MCP protocol |
-| 🔒 **Security Hardened** | CSRF protection, secure file handling, thread safety |
+| 🎤 **Voice Interface** | Real-time speech recognition and voice analysis |
+| 🤖 **Amazon Q Integration** | AWS-powered AI for dynamic question generation |
+| 💼 **Real Job Matching** | Live job postings from Adzuna API with salary data |
+| 📄 **Smart Resume Analysis** | AI skill extraction and professional profiling |
+| 📊 **Multi-Dimensional Scoring** | 6-factor performance evaluation system |
+| 🎯 **Personalized Questions** | Skill-based dynamic interview questions |
+| 📈 **Live Job Recommendations** | Real opportunities with direct apply links |
+| 🔒 **Enterprise Security** | CSRF protection and secure data handling |
 
 ## 🚀 Quick Start
 
-### 🎯 **Secure AI Voice Interview** (Recommended)
+### 🚀 **Quick Start with Real Jobs**
 ```bash
-# One-click secure setup:
-quick_start.bat
-```
-
-### 🛠️ **Manual Setup**
-```bash
-# 1. Install secure dependencies
+# 1. Install dependencies
 pip install -r requirements.txt
 
-# 2. Configure environment (IMPORTANT!)
+# 2. Configure APIs
 cp .env.example .env
-# Edit .env with your secure configuration
+# Add your Adzuna API credentials to .env
 
-# 3. Start secure voice interview system
-python voice_interview_app.py
+# 3. Start voice interview system
+python amazon_q_voice_app.py
 
-# 4. Open browser
-# https://localhost:5003 (HTTPS recommended)
+# 4. Access interface
+# http://localhost:5003
 ```
 
-### ⚡ **Amazon Q CLI Integration**
+### 💼 **Test Real Job Integration**
 ```bash
-# CLI interface for batch processing:
-python amazon_q_integration.py interview --resume "resume.pdf" --role "Software Engineer"
+# Test job API with your skills:
+python test_job_api.py
+
+# CLI question generation:
+python aws_q_working.py questions --resume "resume.pdf" --role "Software Engineer"
 ```
 
 ## 🔧 System Architecture
 
-### 🤖 **AI Models Integration**
-- **Hugging Face Transformers**: NLP models for skill extraction
-- **Speech Recognition**: Real-time voice-to-text conversion
-- **Multi-dimensional Evaluation**: 6-factor assessment system
-- **Job Matching**: AI-powered role recommendations
+### 🤖 **AI & Job Integration**
+- **Amazon Q Developer**: AWS-powered question generation
+- **Adzuna Job API**: Live job postings from 1000+ sources
+- **Speech Recognition**: Real-time voice transcription
+- **Smart Matching**: Skills-based job ranking with salary data
 
 ### 🔒 **Security Architecture**
 - **CSRF Protection**: All forms protected against cross-site attacks
@@ -66,22 +63,21 @@ python amazon_q_integration.py interview --resume "resume.pdf" --role "Software 
 - **Environment Config**: Secure credential management
 - **Path Security**: Prevention of directory traversal attacks
 
-### 🎤 **Voice Processing Pipeline**
+### 💼 **Complete Interview Pipeline**
 ```bash
-# Voice input → Speech Recognition → AI Analysis → Evaluation → Report
-# All steps include security validation and error handling
+# Resume Upload → AI Analysis → Voice Interview → Real Job Matching → Report
+# Integrated with live job APIs and AWS services
 ```
 
 ## 📁 Project Structure
 
 ```
 📦 intelligent-mock-interview-assistant
-├── 🚀 quick_start.bat               # Secure launcher
-├── 🎤 voice_interview_app.py        # Main secure voice app
-├── 🤖 huggingface_mcp_server.py     # AI processing server
-├── 🌐 amazon_q_integration.py       # CLI integration
-├── 📄 enhanced_resume_parser.py     # Secure resume processing
-├── 📊 report_generator.py           # Secure report generation
+├── 🎤 amazon_q_voice_app.py         # Main voice interview app
+├── 💼 job_api_integration.py        # Real job API integration
+├── 🤖 aws_q_working.py              # Amazon Q Developer integration
+├── 📊 test_job_api.py               # Job API testing
+├── 🧪 test_voice_app.py             # Complete system testing
 ├── 📁 templates/                    # HTML templates
 │   └── voice_interview.html         # Main interface
 ├── 📁 static/                       # Static assets
@@ -99,65 +95,66 @@ python amazon_q_integration.py interview --resume "resume.pdf" --role "Software 
 
 | Step | Action | Description |
 |------|--------|-------------|
-| 1️⃣ | **Upload Resume** | AI analyzes PDF/DOCX with Hugging Face models |
-| 2️⃣ | **AI Question Generation** | Personalized questions based on your skills |
-| 3️⃣ | **Voice Answers** | Speak naturally - AI transcribes in real-time |
-| 4️⃣ | **AI Evaluation** | Multi-dimensional scoring with voice analysis |
-| 5️⃣ | **Comprehensive Report** | Detailed feedback and job recommendations |
+| 1️⃣ | **Upload Resume** | AI extracts skills and analyzes experience |
+| 2️⃣ | **Dynamic Questions** | Amazon Q generates personalized questions |
+| 3️⃣ | **Voice Interview** | Real-time speech recognition and analysis |
+| 4️⃣ | **Performance Scoring** | Multi-dimensional evaluation system |
+| 5️⃣ | **Real Job Matching** | Live job postings with salary data and apply links |
 
-### 🌐 **Amazon Q CLI Commands**
+### 💼 **Real Job API Commands**
 ```bash
-# Analyze resume with AI
-python amazon_q_integration.py analyze --resume "resume.pdf" --role "Software Engineer"
+# Test job integration
+python test_job_api.py
 
-# Generate interview questions
-python amazon_q_integration.py questions --resume "resume.pdf" --role "Data Scientist"
+# Generate questions with AWS
+python aws_q_working.py questions --resume "resume.pdf" --role "Software Engineer"
 
-# Complete voice interview simulation
-python amazon_q_integration.py interview --resume "resume.pdf" --role "Frontend Developer"
+# Complete voice interview with real jobs
+python amazon_q_voice_app.py
 ```
 
 ## 🔌 Amazon Q CLI Integration
 
-### 🤖 **MCP Server Features**
-- **Resume Analysis**: AI-powered skill extraction
-- **Question Generation**: Role-specific interview questions
-- **Voice Processing**: Speech-to-text with analysis
-- **Evaluation Engine**: Multi-dimensional scoring
-- **Report Generation**: Comprehensive assessment
+### 💼 **Real Job Integration Features**
+- **Live Job Fetching**: Current openings from Adzuna API
+- **Skill Matching**: Jobs ranked by resume skills
+- **Salary Insights**: Real market data and ranges
+- **Direct Applications**: One-click apply to positions
+- **Multiple Sources**: Expandable to more job APIs
 
-### 🛠️ **Available MCP Tools**
-| Tool | Function | Description |
-|------|----------|-------------|
-| `analyze_resume_hf` | Resume parsing | Hugging Face NLP analysis |
-| `generate_questions_hf` | Question creation | AI-generated questions |
-| `process_voice_answer` | Voice processing | Speech recognition & analysis |
-| `evaluate_answer_hf` | Answer scoring | Multi-dimensional evaluation |
-| `complete_interview_hf` | Report generation | Comprehensive assessment |
+### 🛠️ **Available Job APIs**
+| API | Coverage | Features |
+|-----|----------|----------|
+| **Adzuna** | 1000+ job boards | Free tier, global coverage |
+| **JSearch** | LinkedIn, Indeed, Glassdoor | Premium features via RapidAPI |
+| **GitHub Jobs** | Tech-focused | Developer positions (discontinued) |
+| **Custom APIs** | Expandable | Add your preferred job sources |
 
 ## 🛠️ Installation & Setup
 
-### 📦 **Secure Dependencies**
+### 📦 **Dependencies & APIs**
 ```bash
-# Install all secure dependencies:
+# Install dependencies:
 pip install -r requirements.txt
 
-# Key security updates:
-# - requests>=2.32.4 (fixes CVE vulnerabilities)
-# - Flask-WTF>=1.1.1 (CSRF protection)
-# - python-dotenv>=1.0.0 (environment management)
+# Key packages:
+# - flask (web framework)
+# - boto3 (AWS integration)
+# - requests (API calls)
+# - python-dotenv (environment management)
 ```
 
-### 🔒 **Security Configuration**
+### 🔑 **API Configuration**
 ```bash
-# 1. Copy environment template
-cp .env.example .env
+# 1. Get Adzuna API credentials (free):
+# https://developer.adzuna.com/
 
-# 2. Generate secure keys
-python -c "import secrets; print('FLASK_SECRET_KEY=' + secrets.token_hex(32))"
-python -c "import secrets; print('WTF_CSRF_SECRET_KEY=' + secrets.token_hex(32))"
+# 2. Add to .env file:
+ADZUNA_APP_ID=your_app_id
+ADZUNA_API_KEY=your_api_key
 
-# 3. Edit .env with generated keys and your settings
+# 3. Optional: Add RapidAPI key for more sources
+RAPIDAPI_KEY=your_rapidapi_key
 ```
 
 ### 🎤 **Voice Setup**
@@ -167,35 +164,36 @@ python -c "import secrets; print('WTF_CSRF_SECRET_KEY=' + secrets.token_hex(32))
 
 ## 📊 AI Evaluation System
 
-### 🧠 **Multi-Dimensional Analysis**
-| Dimension | Focus Area | AI Analysis |
-|-----------|------------|-------------|
-| 🔧 **Technical Mastery** | Domain expertise | Keyword analysis, concept depth |
-| 🧠 **Problem Solving** | Analytical thinking | Solution approach, methodology |
-| 💬 **Communication** | Clarity & articulation | Voice analysis, structure |
-| 💡 **Innovation** | Creative solutions | Novel approaches, optimization |
-| 👥 **Leadership** | Team management | Collaboration indicators |
-| 🏗️ **System Thinking** | Architecture design | Scalability, integration |
+### 💼 **Real Job Matching System**
+| Feature | Description | Benefit |
+|---------|-------------|----------|
+| 🎯 **Skill Matching** | Jobs ranked by resume skills | Relevant opportunities |
+| 💰 **Salary Data** | Real market rates | Informed negotiations |
+| 📍 **Location Filter** | Geographic preferences | Targeted search |
+| 🏢 **Company Insights** | Employer information | Better decisions |
+| 🔗 **Direct Apply** | One-click applications | Faster process |
+| 📊 **Market Trends** | Industry insights | Career planning |
 
-### 🎯 **Scoring Algorithm**
-- **Weighted Scoring**: Each dimension has specific weight
-- **Voice Metrics**: Clarity, confidence, pace analysis
-- **Content Analysis**: Technical depth, completeness
-- **Hiring Recommendation**: AI-powered decision support
+### 🎯 **Job Ranking Algorithm**
+- **Skill Match Score**: Percentage of skills alignment
+- **Salary Range**: Market-competitive compensation
+- **Company Rating**: Employer reputation boost
+- **Location Preference**: Geographic relevance
+- **Experience Level**: Seniority appropriateness
 
 ## 🌐 Web Interfaces
 
-### 🎤 **Voice Interview (Port 5003)**
-- Real-time voice recording and transcription
-- AI-powered question generation
-- Multi-dimensional evaluation
-- Comprehensive reporting
+### 🎤 **Voice Interview System**
+- Real-time speech recognition
+- Dynamic question generation via Amazon Q
+- Multi-dimensional performance scoring
+- Live job matching with salary data
 
-### 🌐 **Amazon Q CLI**
-- Command-line interface for batch processing
-- MCP protocol integration
-- Automated report generation
-- Scriptable workflows
+### 💼 **Job Integration Dashboard**
+- Real job postings from Adzuna API
+- Skill-based job recommendations
+- Salary insights and market data
+- Direct application links
 
 ## 🛠️ Troubleshooting
 
@@ -203,36 +201,36 @@ python -c "import secrets; print('WTF_CSRF_SECRET_KEY=' + secrets.token_hex(32))
 
 | Problem | Solution |
 |---------|----------|
-| 🔒 **CSRF token missing** | Ensure .env has WTF_CSRF_ENABLED=True |
-| 📁 **File upload fails** | Check file type (PDF/DOCX) and size (<50MB) |
-| 🎤 **Microphone not working** | Use HTTPS, check browser permissions |
-| 🤖 **AI models not loading** | Run: `pip install -r requirements.txt` |
-| 🔐 **Environment errors** | Copy .env.example to .env and configure |
-| 🌐 **MCP server issues** | Check dependencies, restart server |
+| 💼 **No jobs found** | Check Adzuna API credentials in .env |
+| 📁 **File upload fails** | Verify PDF/DOCX format and size (<50MB) |
+| 🎤 **Voice not working** | Enable microphone permissions in browser |
+| 🤖 **Questions undefined** | Restart app: `python amazon_q_voice_app.py` |
+| 🔐 **API errors** | Verify .env configuration and API quotas |
+| 🌐 **Connection issues** | Check internet and API service status |
 
-### 🔧 **Security & Performance**
-- **HTTPS Required**: Voice features need secure context
-- **Environment Config**: Always use .env for secrets
-- **File Validation**: Only PDF/DOCX files accepted
-- **Session Security**: Thread-safe concurrent handling
-- **GPU Acceleration**: Install CUDA for faster AI processing
+### 🔧 **Performance & APIs**
+- **API Rate Limits**: Adzuna free tier: 1000 calls/month
+- **Caching**: Job results cached for optimal performance
+- **Error Handling**: Graceful fallbacks if APIs unavailable
+- **Multi-Source**: Expandable to additional job APIs
+- **Real-Time**: Live job data with current salary information
 
 ## 🚀 Getting Started
 
-### 🎯 **Ready for secure AI-powered interviews?**
+### 🚀 **Ready for AI interviews with real job matching?**
 
 1. **Clone this repository**
-2. **Run `quick_start.bat`** for secure setup
-3. **Configure `.env`** with your secure settings
-4. **Start secure interviews**: Access https://localhost:5003
-5. **Or use CLI**: `python amazon_q_integration.py interview --resume "your_resume.pdf"`
+2. **Get Adzuna API credentials** (free at developer.adzuna.com)
+3. **Configure `.env`** with your API keys
+4. **Start interviews**: `python amazon_q_voice_app.py`
+5. **Access**: http://localhost:5003
 
-### 🔒 **Security First**
-- ✅ All vulnerabilities fixed (17 → 0)
-- ✅ CSRF protection enabled
-- ✅ Secure file handling
-- ✅ Thread-safe operations
-- ✅ Environment-based configuration
+### 💼 **Real Job Integration**
+- ✅ Live job postings from Adzuna API
+- ✅ Skill-based job matching
+- ✅ Real salary data and insights
+- ✅ Direct application links
+- ✅ Market trend analysis
 
 ---
 
@@ -254,11 +252,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ### 🎯 **Ready to ace your next interview with secure AI?**
 
-**Choose your interface:**
+**Choose your path:**
 
-[![Secure Voice Interview](https://img.shields.io/badge/Secure%20Voice%20Interview-Start%20Now-brightgreen.svg?style=for-the-badge)](quick_start.bat)
-[![Amazon Q CLI](https://img.shields.io/badge/Amazon%20Q%20CLI-Setup-blue.svg?style=for-the-badge)](amazon_q_integration.py)
+[![Voice Interview](https://img.shields.io/badge/Voice%20Interview-Start%20Now-brightgreen.svg?style=for-the-badge)](amazon_q_voice_app.py)
+[![Test Jobs API](https://img.shields.io/badge/Test%20Jobs%20API-Verify%20Setup-blue.svg?style=for-the-badge)](test_job_api.py)
 
-**Powered by Hugging Face AI Models & Secure Architecture**
+**Powered by Amazon Q Developer & Real Job APIs**
 
 </div>

@@ -1,0 +1,22 @@
+John Doe
+Software Engineer
+john.doe@email.com
+
+EXPERIENCE
+2020-2024: Senior Software Engineer at Tech Corp
+- Developed web applications using Python, Django, React
+- Built REST APIs and microservices
+- Worked with AWS, Docker, PostgreSQL
+- Led team of 3 developers
+
+2018-2020: Software Developer at StartupXYZ
+- Frontend development with JavaScript, HTML, CSS
+- Backend development with Node.js
+- Database design with MongoDB
+
+SKILLS
+- Programming: Python, JavaScript, Java, TypeScript
+- Frameworks: Django, React, Node.js, Spring
+- Databases: PostgreSQL, MongoDB, Redis
+- Cloud: AWS, Docker, Kubernetes
+- Tools: Git, Linux, Jenkins
