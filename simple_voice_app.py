@@ -126,24 +126,57 @@ def analyze_resume_simple(file_path, role):
     }
 
 def generate_questions_simple(role, skills, experience_level):
-    """Generate simple interview questions"""
-    questions = [
-        {
-            "question": f"Tell me about your experience with {skills[0] if skills else 'programming'} and how you've used it in projects.",
+    """Generate dynamic interview questions based on resume analysis"""
+    from amazon_q_integration import AmazonQIntegration
+    import asyncio
+    
+    # Initialize Amazon Q
+    aq = AmazonQIntegration()
+    
+    try:
+        # Try to get questions from Amazon Q
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        questions_result = loop.run_until_complete(aq.generate_questions_command(role, 5))
+        loop.close()
+        
+        if questions_result and 'questions' in questions_result:
+            return questions_result
+    except Exception as e:
+        print(f"Amazon Q generation failed: {e}")
+    
+    # Fallback: Generate skill-based questions
+    questions = []
+    
+    # Technical questions based on skills
+    for skill in skills[:2]:  # Use top 2 skills
+        questions.append({
+            "question": f"Tell me about your experience with {skill} and how you've used it in real projects.",
             "category": "Technical",
+            "skill_focus": skill,
             "expected_duration": 3
-        },
-        {
-            "question": "Describe a challenging problem you solved and your approach to solving it.",
-            "category": "Problem Solving", 
+        })
+    
+    # Role-specific question
+    questions.append({
+        "question": f"What are the biggest challenges you've faced in {role} roles and how did you overcome them?",
+        "category": "Problem Solving",
+        "expected_duration": 4
+    })
+    
+    # Experience-level based question
+    if experience_level.lower() == 'senior':
+        questions.append({
+            "question": "How do you mentor junior developers and ensure code quality in your team?",
+            "category": "Leadership",
             "expected_duration": 4
-        },
-        {
+        })
+    else:
+        questions.append({
             "question": f"How do you stay updated with the latest trends in {role.lower()}?",
             "category": "Learning",
             "expected_duration": 3
-        }
-    ]
+        })
     
     return {
         'questions': questions,
@@ -152,12 +185,37 @@ def generate_questions_simple(role, skills, experience_level):
     }
 
 def evaluate_answer_simple(question, answer, role):
-    """Simple answer evaluation"""
+    """Evaluate answer using MCP and fallback"""
+    try:
+        # Try to use MCP for evaluation
+        from huggingface_mcp_server import app as mcp_app
+        import asyncio
+        
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        
+        evaluation = loop.run_until_complete(mcp_app.call_tool("evaluate_answer_hf", {
+            "question": question,
+            "answer": answer,
+            "role": role
+        }))
+        loop.close()
+        
+        if evaluation and len(evaluation) > 0:
+            try:
+                return json.loads(evaluation[0].text)
+            except:
+                pass
+                
+    except Exception as e:
+        print(f"MCP evaluation failed: {e}")
+    
+    # Fallback scoring if MCP fails
     word_count = len(answer.split()) if answer else 0
     
-    # Basic scoring
-    content_score = min(100, max(20, word_count * 2))
-    technical_score = content_score + (10 if any(skill.lower() in answer.lower() for skill in ['implement', 'design', 'develop']) else 0)
+    # Enhanced scoring logic
+    technical_keywords = ['implement', 'design', 'develop', 'architecture', 'system', 'optimize']
+    keyword_score = sum(5 for keyword in technical_keywords if keyword.lower() in answer.lower())
     
     return {
         'overall_score': min(100, technical_score),
